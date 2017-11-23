@@ -15,6 +15,8 @@ import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
 import createHistory from 'history/createBrowserHistory';
 import 'sanitize.css/sanitize.css';
+import 'protobufjs';
+import DatadogTracer from 'datadog-tracer';
 
 // Import root app
 import App from 'containers/App';
@@ -51,6 +53,12 @@ const history = createHistory();
 const store = configureStore(initialState, history);
 const MOUNT_NODE = document.getElementById('app');
 
+const tracer = new DatadogTracer({
+  service: 'example',
+  hostname: window.location.hostname,
+  port: 8080,
+});
+const span = tracer.startSpan('browser.render');
 const render = (messages) => {
   ReactDOM.render(
     <Provider store={store}>
@@ -63,6 +71,7 @@ const render = (messages) => {
     MOUNT_NODE
   );
 };
+span.finish();
 
 if (module.hot) {
   // Hot reloadable React components and translation json files
